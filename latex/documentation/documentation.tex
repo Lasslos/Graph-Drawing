@@ -117,6 +117,8 @@ function plot_graph_3d(g::SimpleGraph, p::Matrix{Float64})
 end
 \end{minted}
 
+In the intialization of all the vectors and matrices, make sure to update the dimensions to $3$.
+
 \subsection{Stress functions}
 
 Since the two stress functions explored in the theoretical part is structured in a similar way,
@@ -197,7 +199,7 @@ We then compute the stress and its gradient at each step, and update the positio
 To check for convergence, we either stop after the maximum number of steps has been reached,
 or if the stress values do not change meaningfully.
 It is important that we do not check for equality of the stress values, since they are floating-point numbers and can be very close
-to each other without being exactly equal. Instead, we check if the absolute difference is smaller than a small threshold (in this case, $10^{-6}$).
+to each other without being exactly equal. Instead, we check if the absolute difference is smaller than a small threshold.
 
 
 \subsubsection{Simple Gradient Descent}
@@ -366,7 +368,7 @@ We increase the learning rate to $\alpha=0.1$ and see that convergence is much f
 \label{wheel-graph-erll}
 \end{figure}
 
-The function $erll_stress$ punishes verticies being close way more than $fr_stress$.
+The function $erll\_stress$ punishes verticies being close way more than $fr\_stress$.
 For this reason, the graphs spreads out way more, which makes the learning rate proportionally smaller.
 
 \paragraph{A good learning rate}
