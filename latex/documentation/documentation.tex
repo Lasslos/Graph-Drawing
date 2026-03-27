@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \usepackage{amssymb}
 \usepackage{minted}
+\usepackage{svg}
 
 \title{Graph drawing by stress minimization}
 \author{Laslo Hauschild, Lennart Peters}
@@ -172,6 +173,11 @@ from exploding when two vertices are mapped to the same point.
 We use the \texttt{pairwise} function from the Distances library \cite{distancesjl} to compute the distance matrix $D$.
 This is way more effiecient than computing the distances in a nested loop.
 
+Also note that the erll stress function takes an additional argument,
+which is the degree of each vertex. This is used in the calculation,
+but since the degree of each vertex does not change,
+it would be inefficient to calculate it inside the vertex stress function.
+
 \subsection{Gradient descent}
 
 The final piece in the puzzle is to actually use the plotting and the stress functions
@@ -213,6 +219,7 @@ function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int6
 
         if length(stresses) > 1 && abs(stresses[end] - stresses[end-1]) < 1e-6
             println("converged!")
+            println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
@@ -279,6 +286,229 @@ end
 \end{minted}
 
 \section{Results}
+
+\subsection{Figuring out good learning rates}
+\subsubsection{Simple Gradient Descent, FR Stress}
+Let's start with the simple gradient descent method, fr stress, $\alpha=0.001$ and the wheel graph 11.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a001_i4644.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 4644 Iterations}
+\label{wheel-graph-good}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a001_i3669.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 3669 Iterations}
+\label{wheel-graph-bad}
+\end{figure}
+
+Almost always, the graph converges to something looking like Figure \ref{wheel-graph-good}.
+
+In a few cases (less than $10\%$), we converge into a local minimum like depicted in Figure \ref{wheel-graph-bad}
+
+\paragraph{Turning up the learning rate}
+
+When we increase the learning rate $\alpha$, there are interesting results.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a01_i428.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.01$, Took 428 Iterations}
+\label{wheel-graph-alpha-01}
+\end{figure}
+
+With a learning rate $\alpha=0.01$, the convergence speed dramatically increases with no visible poorer quality.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a1_i57.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 57 Iterations}
+\label{wheel-graph-alpha-1}
+\end{figure}
+
+At $\alpha=0.1$, the convergence speed increases even more, with quality staying esentially the same.
+However, the rate of poorly converged graphs increases, however this is difficult to quantify.
+We also see that stress has actually increased twice, even though we were going ``downhill''.
+This is because we are taking too big steps, which makes us overshoot the ``valley''.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a10_i11.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 11 Iterations}
+\label{wheel-graph-alpha-10}
+\end{figure}
+
+Finally, at $\alpha=1.0$, the algorithm does not converge at all, and the stress values explode.
+What's interesting is that it almost always takes 11 steps to diverge.
+Investigating what is going on reveals that most of the paramters turn to $NaN$ at step 10, not changing at step 11 and therefore ``converging'' as per our definition.
+The reason for this being essentially repeatable even though the initial positions are random
+is because the initial positions are bound to be in a range between 0 and 1.
+
+From this, we can learn that we should always be careful when choosing the learning rate.
+For a simple graph, there are not as many local minima, so bigger learning rates still work,
+but we should not do this for a more complex graph.
+
+\subsubsection{Simple Gradient Descent, ERLL Stress}
+
+Continuing with the simple gradient descent method, erll stress, $\alpha=0.001$ and the wheel graph 11,
+we see that convergence is painfully slow. On the graph, we can see the verticies spreading out
+way more than with fr stress. This reveals a fundamental difference:
+ERLL stress punishes verticies being close way more than FR stress, which makes the learning rate proportionally smaller.
+We increase the learning rate to $\alpha=0.1$ and see that convergence is much faster.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_erll_a01_i9586.svg}
+\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 9586 Iterations}
+\label{wheel-graph-erll}
+\end{figure}
+
+The function $erll_stress$ punishes verticies being close way more than $fr_stress$.
+For this reason, the graphs spreads out way more, which makes the learning rate proportionally smaller.
+
+\paragraph{A good learning rate}
+
+Considering that at $\alpha=0.001$ compute times are reasonable for FR Stress,
+and at $\alpha=0.1$ compute times are reasonable for ERLL Stress, we can say that these are good learning rates for the respective stress functions.
+
+For simplicity reasons, we will use the same $\alpha$ for the nesterov gradient descent,
+one could of course tune this seperately.
+
+\subsection{Some Graphs}
+In the following, we will show some examples of graphs drawn with
+the nesterov gradient descent and the different stress functions.
+They offer a comparison between the development of the stress functions.
+We will use $\alpha=0.001$ for the fr stress and $\alpha=0.1$ for the erll stress, as we have established these are good learning rates.
+As a momentum decay rate, we will use $\beta=0.9$.
+
+Because some graphs move very minimally even with this $\alpha$, we sometimes increase the convergence threshold $\epsilon$.
+
+\subsubsection{Icosahedral}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_erll_i5007.svg}
+\caption{Icosahedral Graph, Took 5007 Iterations}
+\label{icosahedral-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_fr_i609.svg}
+\caption{Icosahedral Graph, Took 609 Iterations}
+\label{icosahedral-nesterov-fr}
+\end{figure}
+
+\subsubsection{Karate network}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_erll_i45773.svg}
+\caption{Karate Network, Took 45773 Iterations}
+\label{karate-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_fr_i3346.svg}
+\caption{Karate Network, Took 3346 Iterations}
+\label{karate-nesterov-fr}
+\end{figure}
+
+\subsubsection{Dorogovtsev Mendes Graph}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_25_nesterov_erll_i36780.svg}
+\caption{Dorogovtsev Mendes Graph, Took 36780 Iterations}
+\label{dorogovtsev-mendes-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_25_nesterov_fr_i4059.svg}
+\caption{Dorogovtsev Mendes Graph, Took 4059 Iterations}
+\label{dorogovtsev-mendes-nesterov-fr}
+\end{figure}
+
+\subsubsection{Circular Ladder Graph}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+\includesvg[width=0.6\textwidth]{../assets/circular_ladder_graph_nesterov_erll_i27000.svg}
+\caption{Circular Ladder Graph, Took (exactly) 27000 Iterations}
+\label{circular-ladder-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/circular_ladder_graph_nesterov_fr_i13683.svg}
+\caption{Circular Ladder Graph, Took 13683 Iterations}
+\label{circular-ladder-nesterov-fr}
+\end{figure}
+
+\subsubsection{Watts Strogatz Graph}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_erll_i22689.svg}
+\caption{Watts Strogatz Graph, Took 22689 Iterations}
+\label{watts-strogatz-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_fr_i1937.svg}
+\caption{Watts Strogatz Graph, Took 1937 Iterations}
+\label{watts-strogatz-nesterov-fr}
+\end{figure}
+
+\subsubsection{Static Scale Free Graph}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_erll_i9587.svg}
+\caption{Static Scale Free Graph, Took 9587 Iterations}
+\label{static-scale-free-nesterov-erll}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_fr_i1383.svg}
+\caption{Static Scale Free Graph, Took 1383 Iterations}
+\label{static-scale-free-nesterov-fr}
+\end{figure}
+
+\subsection{Conclusion}
+
+In this project, we have explained the theory behind graph drawing,
+implemented the graph drawing algorithm in Julia and compared different approaches and settings.
+
+In our implementation, FR stress is not only much faster, but also produces better results.
+ERLL stress just pushes verticies too far apart.
+
+With the settings above, we have created some nice drawings of graphs.
+They offer true insight into the structure even with no knowledge of the graphs themselves.
+
+However, some graphs like the circular ladder graph almost always get stuck in suboptimal positions,
+and graphs like bipartite graphs get drawn in a very unsual way with this method.
+
+While fun, for a truly good graph drawing algorithm, many improvements are possible.
 
 \printbibliography[heading=bibnumbered]
 

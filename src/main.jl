@@ -71,11 +71,12 @@ function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int6
     stresses = Float64[]
 
     for k in 1:max_steps
-        s, (grad,) = Zygote.withgradient(q -> fr_stress(g, q), p)
+        s, (grad,) = Zygote.withgradient(q -> erll_stress(g, q, deg), p)
         push!(stresses, s)
 
         if length(stresses) > 1 && abs(stresses[end] - stresses[end-1]) < 1e-6
             println("converged!")
+            println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
@@ -107,7 +108,7 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
         new_momentum = beta * momentum - alpha * grad
         push!(stresses, s)
 
-        if length(stresses) > 50 && abs(stresses[end] - stresses[end-1]) < 1e-9
+        if length(stresses) > 50 && abs(stresses[end] - stresses[end-1]) < 1e-7
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
@@ -129,7 +130,7 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
 end
 
 function run(g)
-    simple_gradient_descent(g, 0.001, 1000000)
+    nesterov_gradient_descent(g, 0.001, 0.9, 1000000)
 end
 
-run(wheel_graph(11))
+run(static_scale_free(14, 40, 5))
