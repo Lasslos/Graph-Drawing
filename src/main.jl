@@ -15,9 +15,18 @@ function plot_graph(g::SimpleGraph, p::Matrix{Float64})
     return plt
 end
 
+function plot_graph_3d(g::SimpleGraph, p::Matrix{Float64})
+    plt = plot(legend = false, aspect_ratio = :equal)
+    for e in edges(g)
+        plot!(plt, [p[1, src(e)], p[1, dst(e)]], [p[2, src(e)], p[2, dst(e)]], [p[3, src(e)], p[3, dst(e)]],
+                color = :black)
+    end
+    scatter!(plt, p[1, :], p[2, :], p[3, :], markersize=5, color = :blue)
+    return plt
+end
+
 function stress(
     g::SimpleGraph, 
-    p::Matrix{Float64}, 
     edge_stress_f::Function, 
     vertex_stress_f::Function, 
     combine_f::Function)
@@ -42,7 +51,7 @@ function fr_stress(g::SimpleGraph, p::Matrix{Float64})
     edge_stress_f = (i, j) -> D[i, j]^3
     vertex_stress_f = (i, j) -> log(D[i, j] + 10^(-6))
     combine_f = (x, y) -> x / 6 - y
-    return stress(g, p, edge_stress_f, vertex_stress_f, combine_f)
+    return stress(g, edge_stress_f, vertex_stress_f, combine_f)
 end
 
 
@@ -51,7 +60,7 @@ function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
     edge_stress_f = (i, j) -> D[i, j]
     vertex_stress_f = (i, j) -> deg[i] * deg[j] * log(D[i, j] + 10^(-6))
     combine_f = (x, y) -> x / 2 - y
-    return stress(g, p, edge_stress_f, vertex_stress_f, combine_f)
+    return stress(g, edge_stress_f, vertex_stress_f, combine_f)
 end
 
 function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int64)
@@ -96,13 +105,10 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
     for k in 0:max_steps
         s, (grad,) = Zygote.withgradient(q -> fr_stress(g, q), p + beta * momentum)
         new_momentum = beta * momentum - alpha * grad
-        #println("k=$k  s=$s  norm(p)=$(norm(p))  norm(grad)=$(norm(grad))")
         push!(stresses, s)
 
         if length(stresses) > 50 && abs(stresses[end] - stresses[end-1]) < 1e-9
             println("converged!")
-            println("last stress: ", stresses[end])
-            println("previous stress: ", stresses[end - 1])
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
@@ -123,14 +129,7 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
 end
 
 function run(g)
-    nesterov_gradient_descent(g, 0.01, 0.9, 1000000)
+    simple_gradient_descent(g, 0.001, 1000000)
 end
 
-g = SimpleGraph(8)
-for i in 0:7, j in i+1:7
-    if count_ones(i ⊻ j) == 1   # XOR: differ in exactly one bit
-        add_edge!(g, i+1, j+1)
-    end
-end
-
-run(g)
+run(wheel_graph(11))
