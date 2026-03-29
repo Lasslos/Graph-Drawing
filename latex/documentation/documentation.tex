@@ -43,7 +43,8 @@ Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v
 
 \subsection{Modeling stress}
 
-We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t. we can benefit from their analytic properties. For $n \geq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$, but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment. Drawing $H$ this way results in a bounded interval in $\mathbb{R}$, where straight-line segments overlap with the points, which we deem unfit for representation purposes. For $n \geq 4$, we draw in high dimensions and we will see, that $n=2,3$ suffice. When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$. For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$. We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction. A broadly used approach is to use a stress-function $S$ that assigns  the graph $H$ a real number, the stress in $H$. The local minima of $S$ are our desired representations of $G$.
+We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t. we can benefit from their analytic properties. For $n \geq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$, but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment. Drawing $H$ this way results in a bounded interval in $\mathbb{R}$, where straight-line segments overlap with the points, which we deem unfit for representation purposes.
+For $n \geq 4$, visualization becomes difficult. We will see that $n=2,3$ suffice. When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$. For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$. We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction. A broadly used approach is to use a stress-function $S$ that assigns  the graph $H$ a real number, the stress in $H$. The local minima of $S$ are our desired representations of $G$.
 
 \subsubsection{FR model}
 
@@ -53,7 +54,7 @@ Fruchterman and Reingold developed this model in 1991, following two main princi
 \item vertices should not  be drawn too near to each other
 \end{itemize}
 The FR model uses the following stress-function:
-\begin{equation} S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}-\sum_{\{u,v \} \in V^2}{log \parallel p(u)-p(v) \parallel} \end{equation}
+\begin{equation} S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}-\sum_{\{u,v \} \subseteq V}{log \parallel p(u)-p(v) \parallel} \end{equation}
 Observe the following:
 \begin{itemize}
 \item the further apart neighboring vertices get mapped the bigger the stress
@@ -65,8 +66,8 @@ $S_{FR}$ satisfies the two main principles, while being rather quick when implem
 \subsubsection{ERLL model}
 
 The Edge Repulsion LinLog model by Andreas Noack, 2004, places its focus on the graph's edges. For $v \in V$, let $deg(v)$ denote the number of edges $v$ is an endpoint of.
-\begin{equation} S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} - \sum_{\{u,v \} \in V^2}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel} \end{equation}
-The edges cause both attraction and repulsion. Let us compare the ERLL with the FR model. Let $G$ be a graph. Now consider the unordered pairs ${u,v} \in V^2$. If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=deg(v)^2$. Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $deg(u)deg(v)$. The repulsive force in the FR model only depends on distance, letting "big nodes" be pulled inside the graph's embedding by the attractive force. The ERLL solves this issue, spacing "big nodes" evenly. This results in clearer embeddings of highly ununiform graphs. 
+\begin{equation} S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} - \sum_{\{u,v \} \subseteq V}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel} \end{equation}
+The edges cause both attraction and repulsion. Let us compare the ERLL with the FR model. Let $G$ be a graph. Now consider the unordered pairs ${u,v} \subseteq V$. If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=deg(v)^2$. Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $deg(u)deg(v)$. The repulsive force in the FR model only depends on distance, letting "big nodes" be pulled inside the graph's embedding by the attractive force. The ERLL solves this issue, spacing "big nodes" evenly. This results in clearer embeddings of highly ununiform graphs. 
 
 \section{Implementation}
 
@@ -241,7 +242,7 @@ faster and faster as it goes down the hill. This can help to escape local minima
 Friction is modelled by $\beta$, which says how much of the previous momentum we keep. Because $\beta = 0.9$, we keep 90\% of the previous momentum.
 
 \begin{minted}{julia}
-function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64, max_steps::Int64)
+function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64, max_steps::Int64, filename::String)
     n = nv(g) # Number of vertices
     deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
@@ -252,16 +253,17 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
 
     for k in 0:max_steps
         s, (grad,) = Zygote.withgradient(q -> fr_stress(g, q), p + beta * momentum)
+        #s, (grad,) = Zygote.withgradient(q -> erll_stress(g, q, deg), p + beta * momentum)
         new_momentum = beta * momentum - alpha * grad
         push!(stresses, s)
 
-        if length(stresses) > 50 && abs(stresses[end] - stresses[end-1]) < 1e-9
+        if length(stresses) > 50 && abs(stresses[end] / stresses[end-1]) < 1e-7
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, "converged.svg")
+            savefig(final, filename * "_nesterov_fr_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 
@@ -275,12 +277,15 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
         end
     end
 end
-
 \end{minted}
 
 \section{Results}
 
 \subsection{Figuring out good learning rates}
+When trying our models, we had some problems with the suggested learning rates. For the FR stress, the suggested learning rates were fine,
+but for ERLL, the learning rates were way to small, which made convergence very slow. Therefore, we analyzed which learning rate fits best for the
+different stress values.
+
 \subsubsection{Simple gradient descent, FR stress}
 Let's start with the simple gradient descent method, fr stress, $\alpha=0.001$ and the wheel graph 11.
 
@@ -379,6 +384,11 @@ As a momentum decay rate, we will use $\beta=0.9$.
 
 Because some graphs move very minimally even with this $\alpha$, we sometimes increase the convergence threshold $\epsilon$.
 
+Note that for this, we have used absolute difference as a convergence criterion.
+We also changed the convergence threshold throughout the experiments,
+as we have not seen a sicnificant improvement with a lower threshold. We did this because for increasingly large graphs,
+convergence was very slow. For comparability, we have annotated each graph with the chosen $\epsilon$.
+
 \subsubsection{Icosahedral}
 
 \begin{figure}[H]
@@ -473,7 +483,7 @@ Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
 
 \begin{figure}[H]
 \centering
-Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
 \includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_erll_i9587.svg}
 \caption{Static Scale Free Graph, Took 9587 Iterations}
 \label{static-scale-free-nesterov-erll}
