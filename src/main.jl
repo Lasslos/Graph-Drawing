@@ -54,7 +54,6 @@ function fr_stress(g::SimpleGraph, p::Matrix{Float64})
     return stress(g, edge_stress_f, vertex_stress_f, combine_f)
 end
 
-
 function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
     D = pairwise(Euclidean(), p, dims=2)
     edge_stress_f = (i, j) -> D[i, j]
@@ -136,7 +135,7 @@ function run()
     simple_gradient_descent(g1, fr_stress, 1.0, 1000000, "wheel_graph_11", "fr")
 
     deg1 = degree(g1)
-    simple_gradient_descent(g1, (g, q) -> erll_stress(g, q, deg1), 0.001, 1000000, "wheel_graph_11", "erll")
+    simple_gradient_descent(g1, (g, q) -> erll_stress(g, q, deg1), 0.1, 1000000, "wheel_graph_11", "erll")
 
     g2 = smallgraph(:icosahedral)
     g3 = smallgraph(:karate)
