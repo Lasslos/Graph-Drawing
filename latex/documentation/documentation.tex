@@ -141,10 +141,10 @@ Let us compare the ERLL with the FR model. Let $G$ be a graph.
 Now consider the unordered pairs ${u,v} \subseteq V$.
 If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=\deg{(v)}^2$.
 
-Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $\deg(u)\deg(v)$.
+Assume $G$ is of non-uniform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $\deg(u)\deg(v)$.
 The repulsive force in the FR model only depends on distance, letting ``big nodes'' be pulled inside the graph's embedding by the attractive force.
 
-The ERLL solves this issue, spacing ``big nodes'' evenly. This results in clearer embeddings of highly ununiform graphs. 
+The ERLL solves this issue, spacing ``big nodes'' evenly. This results in clearer embeddings of highly non-uniform graphs. 
 
 \section{Implementation}
 
@@ -321,7 +321,7 @@ A couple notes:
     However, with this approach, if the stress value is different for different functions, i.e.\ because the nodes are pushed further apart, non-visible changes would be in an order of magnitude higher,
     so to account for that, we should use the relative change instead of the absolute change.
     \item Again, we use anonymous functions here. In this case, to easily swap the stress function, it is passed as an argument instead of being hard-coded.
-    \item The paramters \mintinline{julia}|filename::String| and \mintinline{julia}|stres_fn_name::String|
+    \item The parameters \mintinline{julia}|filename::String| and \mintinline{julia}|stres_fn_name::String|
     are for easier management of multiple graph drawings at the same time. Earlier versions of that implementation just ouputted the same file, overwriting previous results.
 \end{itemize}
 
@@ -432,7 +432,7 @@ This is because we are taking too big steps, which makes us overshoot the ``vall
 
 Finally, at $\alpha=1.0$, the algorithm does not converge at all, and the stress values explode.
 What's interesting is that it almost always takes 11 steps to diverge.
-Investigating what is going on reveals that most of the paramters turn to $NaN$ at step 10, not changing at step 11 and therefore ``converging'' as per our definition.
+Investigating what is going on reveals that most of the parameters turn to $NaN$ at step 10, not changing at step 11 and therefore ``converging'' as per our definition.
 The reason for this being essentially repeatable even though the initial positions are random
 is because the initial positions are bound to be in a range between 0 and 1.
 
@@ -443,9 +443,9 @@ but we should not do this for a more complex graph.
 \subsubsection{Simple gradient descent, ERLL stress}
 
 Continuing with the simple gradient descent method, erll stress, $\alpha=0.001$ and the wheel graph 11,
-we see that convergence is painfully slow. On the graph, we can see the verticies spreading out
+we see that convergence is painfully slow. On the graph, we can see the vertices spreading out
 way more than with fr stress. This reveals a fundamental difference:
-ERLL stress allows verticies to be far away more than FR stress, which makes the learning rate proportionally smaller.
+ERLL stress allows vertices to be far away more than FR stress, which makes the learning rate proportionally smaller.
 We increase the learning rate to $\alpha=0.1$ and see that convergence is much faster.
 
 \begin{figure}[H]
@@ -460,7 +460,7 @@ Considering that at $\alpha=0.001$ compute times are reasonable for FR Stress,
 and at $\alpha=0.1$ compute times are reasonable for ERLL Stress, we can say that these are good learning rates for the respective stress functions.
 
 For simplicity reasons, we will use the same $\alpha$ for the nesterov gradient descent,
-one could of course tune this seperately.
+one could of course tune this separately.
 
 \subsection{Some graphs}
 In the following, we will show some examples of graphs drawn with
@@ -572,13 +572,15 @@ In this project, we have explained the theory behind graph drawing,
 implemented the graph drawing algorithm in Julia and compared different approaches and settings.
 
 In our implementation, FR stress is not only much faster, but also produces better results.
-ERLL stress just pushes verticies too far apart.
+ERLL stress just pushes vertices too far apart.
 
 With the settings above, we have created some nice drawings of graphs.
 They offer true insight into the structure even with no knowledge of the graphs themselves.
 
 However, some graphs like the circular ladder graph almost always get stuck in suboptimal positions,
-and graphs like bipartite graphs get drawn in a very unsual way with this method.
+because they are planar in theory but in practice, the algorithm cannot untwist the two circles.
+
+Graphs like bipartite graphs also get drawn in a very unsual way with this method.
 
 While fun, for a truly good graph drawing algorithm, many improvements are possible.
 
