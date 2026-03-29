@@ -62,7 +62,7 @@ function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
     return stress(g, edge_stress_f, vertex_stress_f, combine_f)
 end
 
-function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, max_steps::Int64, filename::String, stres_fn_name::String)
+function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, max_steps::Int64, filename::String, stress_fn_name::String)
     n = nv(g) # Number of vertices
     p = rand(2, n) # Initial positions
 
@@ -78,7 +78,7 @@ function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Flo
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, filename * "_simple_" * stres_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
+            savefig(final, filename * "_simple_" * stress_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 

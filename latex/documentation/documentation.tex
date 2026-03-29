@@ -82,8 +82,8 @@ To keep it short, let us say $H=p(G)$.
 \subsection{Modeling stress}
 
 We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t.\ we can benefit from their analytic properties.
-For $n \leq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$,
-but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment.
+For $n = 1$, an injective  $ p : V \to \mathbb{R}$ induces an embedding of $G$ in $\mathbb{R}$,
+but we add a drawing function $d : F \to \mathbb{R}, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment.
 Drawing $H$ this way results in a bounded interval in $\mathbb{R}$,
 where straight-line segments overlap with the points,
 which we deem unfit for representation purposes.
@@ -94,7 +94,7 @@ When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite 
 For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$.
 We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction.
 A broadly used approach is to use a stress function $S$ that assigns the graph $H$ a real number, the stress in $H$.
-The global minimum of $S$ is our desired representations of $G$.
+The local minimum of $S$ is our desired representations of $G$.
 
 \subsubsection{FR model}
 
@@ -267,7 +267,7 @@ We then compute the stress and its gradient at each step, and update the positio
 To check for convergence, we either stop after the maximum number of steps has been reached,
 or if the stress values do not change meaningfully.
 It is important that we do not check for equality of the stress values, since they are floating-point numbers and can be very close
-to each other without being exactly equal. Instead, we check if the absolute difference is smaller than a small threshold.
+to each other without being exactly equal. Instead, we check if the relative difference is smaller than a small threshold.
 
 
 \subsubsection{Simple gradient descent}
@@ -277,7 +277,7 @@ Crucially, he does not have any momentum.
 
 \begin{minted}{julia}
 function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64,
-    max_steps::Int64, filename::String, stres_fn_name::String)
+    max_steps::Int64, filename::String, stress_fn_name::String)
 
     n = nv(g) # Number of vertices
     p = rand(2, n) # Initial positions
@@ -296,7 +296,7 @@ function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Flo
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, filename * "_simple_" * stres_fn_name
+            savefig(final, filename * "_simple_" * stress_fn_name
                 * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
@@ -318,7 +318,7 @@ A couple notes:
     \item Let $s_l$ be the last stress value and $s_{l-1}$ be the second to last stress value.
     To calulate if the algorithm converged, we do $\parallel \frac{s_l - s_{l-1}}{s_{l-1}} \parallel< \epsilon$.
     A more natural way might be $\parallel s_l - s_{l-1} \parallel < \epsilon$.
-    However, with this approach, if graphs grew in size, i.e.\ the nodes were further apart, non-visible changes would be in an order of magnitude higher,
+    However, with this approach, if the stress value is different for different functions, i.e.\ because the nodes are pushed further apart, non-visible changes would be in an order of magnitude higher,
     so to account for that, we should use the relative change instead of the absolute change.
     \item Again, we use anonymous functions here. In this case, to easily swap the stress function, it is passed as an argument instead of being hard-coded.
     \item The paramters \mintinline{julia}|filename::String| and \mintinline{julia}|stres_fn_name::String|
