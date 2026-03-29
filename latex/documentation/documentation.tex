@@ -178,8 +178,8 @@ Plotting in higher dimensions is easy. Just extend the \mintinline{julia}{plot!}
 function plot_graph_3d(g::SimpleGraph, p::Matrix{Float64})
     plt = plot(legend = false, aspect_ratio = :equal)
     for e in edges(g)
-        plot!(plt, [p[1, src(e)], p[1, dst(e)]], [p[2, src(e)], p[2, dst(e)]], [p[3, src(e)], p[3, dst(e)]],
-                color = :black)
+        plot!(plt, [p[1, src(e)], p[1, dst(e)]], [p[2, src(e)], p[2, dst(e)]],
+            [p[3, src(e)], p[3, dst(e)]], color = :black)
     end
     scatter!(plt, p[1, :], p[2, :], p[3, :], markersize=5, color = :blue)
     return plt
@@ -276,7 +276,9 @@ being very tired and as such, trying to find the nearest town. To do that, he al
 Crucially, he does not have any momentum.
 
 \begin{minted}{julia}
-function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, max_steps::Int64, filename::String, stres_fn_name::String)
+function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64,
+    max_steps::Int64, filename::String, stres_fn_name::String)
+
     n = nv(g) # Number of vertices
     p = rand(2, n) # Initial positions
 
@@ -286,13 +288,16 @@ function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Flo
         s, (grad,) = Zygote.withgradient(q -> stress_fn(g, q), p)
         push!(stresses, s)
 
-        if length(stresses) > 1 && abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
+        if length(stresses) > 1 &&
+            abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
+
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, filename * "_simple_" * stres_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
+            savefig(final, filename * "_simple_" * stres_fn_name
+                * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 
@@ -330,7 +335,9 @@ faster and faster as it goes down the hill. This can help to escape local minima
 Friction is modelled by $\beta$, which says how much of the previous momentum we keep. Because $\beta = 0.9$, we keep 90\% of the previous momentum.
 
 \begin{minted}{julia}
-function nesterov_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, beta::Float64, max_steps::Int64, filename::String, stress_fn_name::String)
+function nesterov_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64,
+    beta::Float64, max_steps::Int64, filename::String, stress_fn_name::String)
+
     n = nv(g) # Number of vertices
     p = rand(2, n) # Initial positions
 
@@ -343,13 +350,16 @@ function nesterov_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::F
         new_momentum = beta * momentum - alpha * grad
         push!(stresses, s)
 
-        if length(stresses) > 50 && abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
+        if length(stresses) > 50 &&
+            abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
+
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, filename * "_nesterov_" * stress_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
+            savefig(final, filename * "_nesterov_" * stress_fn_name
+                * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 
@@ -556,7 +566,7 @@ Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
 \caption{\label{static-scale-free-nesterov-fr} Static Scale Free Graph, Took 884 Iterations}
 \end{figure}
 
-\subsection{Conclusion}
+\section{Conclusion}
 
 In this project, we have explained the theory behind graph drawing,
 implemented the graph drawing algorithm in Julia and compared different approaches and settings.
@@ -572,6 +582,7 @@ and graphs like bipartite graphs get drawn in a very unsual way with this method
 
 While fun, for a truly good graph drawing algorithm, many improvements are possible.
 
+\newpage
 \printbibliography[heading=bibnumbered]
 
 \end{document}
