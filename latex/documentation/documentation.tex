@@ -9,6 +9,7 @@
 \usepackage{tabularx}
 \usepackage{hyperref}
 \usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{minted}
 \usepackage{svg}
 
@@ -17,6 +18,7 @@
 \date{\today}
 
 \begin{document}
+
 \maketitle
 
 \tableofcontents
@@ -24,27 +26,72 @@
 
 \section{Introduction}
 
-Graphs are a prominent object in modern mathematics. They are quite useful for abstracting complex reallife situations, e.g. railway networks, data structure, geometric objects, etc. Imagine two companies. For each company, employees are denoted as vertices, and daily interactions between employees as edges. A researcher could now compare the companies on communication through hierarchy, between employees of the same department, etc., by studying the two graphs. The researcher needs to meticulously search through huge lists of vertices and edges. Having a graph be represented as a simple drawing, vertices as points, and edges as straight-line segments, would speed up the process. That is part of our goal. We want a lossless representation of finite graphs in $\mathbb{R}^2$ and $\mathbb{R}^3$ in an esthetically pleasing way s.t. we can quickly gain a better understanding of what type a given graph is.
+Graphs are a prominent object in modern mathematics.
+They are quite useful for abstracting complex reallife situations, e.g.
+railway networks, data structure, geometric objects, etc.
+Imagine two companies. For each company, employees are denoted as vertices,
+and daily interactions between employees as edges.
+A researcher could now compare the companies on communication through hierarchy,
+between employees of the same department, etc.,by studying the two graphs.
+The researcher needs to meticulously search through huge lists of vertices and edges.
+Having a graph be represented as a simple drawing, vertices as points,
+and edges as straight-line segments, would speed up the process.
+That is part of our goal. We want a representation of finite graphs
+in $\mathbb{R}^2$ and $\mathbb{R}^3$ in an esthetically pleasing way
+s.t.\ we can quickly gain a better understanding of what type a given graph is.
 
 \section{Graph embedding}
-A graph $G=(V,E)$ is an ordered pair of vertices $V$ and a set of edges $E \subseteq \{ \{u,v \} \mid u,v \in V \}$, an edge $e$ being $e=\{u,v\}$ .
-Since our ultimate goal is to have a drawn version of a given graph $G$, it is natural to limit ourselves to a finite set $V$. A finite set $V$ induces $E$ to be a finite set. First, we will define a general way  to embed graphs in vectorspaces $\mathbb{R}^n$. We will see that every graph $G$ has uncountably many possible embeddings $H$ and then optimize the look of an embedding to a given graph $G$.
+A graph $G=(V,E)$ is an ordered pair of vertices $V$
+and a set of edges $E \subseteq \{ \{u,v \} \mid u,v \in V \}$, an edge $e$ being $e=\{u,v\}$.
+Since our ultimate goal is to have a drawn version of a given graph $G$,
+it is natural to limit ourselves to a finite set $V$.
+A finite set $V$ induces $E$ to be a finite set.
+First, we will define a general way to embed graphs in vectorspaces $\mathbb{R}^n$.
+We will see that every graph $G$ has uncountably many possible embeddings $H$
+and then optimize the look of an embedding to a given graph $G$.
 
 \subsection{Graph embedding}
 
-Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v \in V$ to a point $a \in A$. Let us call the image $W=Im(p) \subseteq A$ and consider $W$ as a set of vertices, then we get the following.
-\begin{equation} p \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad p=q : V \to W \end{equation}
-\linebreak Let $\Omega = \{ \{a,b \} \mid a,b \in A \} $ be the set of all unordered pairs of $W$. We define a function
-\linebreak $P : E \to \Omega, \{ u,v \} \mapsto \{ p(u),p(v) \}$ and call $F=Im(P) \subseteq \Omega$. Since $p$ is injective, therefore $P$ is injective and by the same argument we get the following.
-\begin{equation} P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F \end{equation}
-\linebreak This means, an injective $p$ induces (1) and (2). For the existence of such a $p$, we need to have
-\begin{equation} \quad |V| \leq |A| \text{.} \end{equation}
-\linebreak Gathering what we have, if (3) is true, then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$. To keep it short, let us say $H=p(G)$.
+Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v \in V$ to a point $a \in A$.
+Let us call the image $W=Im(p) \subseteq A$ and consider $W$ as a set of vertices, then we get the following.
+
+\begin{equation} \label{eq:lower-p-injective}
+    p \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad p=q : V \to W
+\end{equation}
+
+Let $\Omega = \{ \{a,b \} \mid a,b \in A \} $ be the set of all unordered pairs of $W$. We define a function
+$P : E \to \Omega, \{ u,v \} \mapsto \{ p(u),p(v) \}$ and call $F=Im(P) \subseteq \Omega$.
+Since $p$ is injective, therefore $P$ is injective and by the same argument we get the following.
+
+\begin{equation} \label{eq:upper-p-injective}
+    P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F
+\end{equation}
+
+This means, an injective $p$ induces~(\eqref{eq:lower-p-injective}) and~(\eqref{eq:upper-p-injective}). For the existence of such a $p$, we need to have
+
+\begin{equation} \label{eq:inequality-vertices-image}
+    \quad |V| \leq |A| \text{.}
+\end{equation}
+
+Gathering what we have, if~(\eqref{eq:inequality-vertices-image}) is true,
+then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$.
+To keep it short, let us say $H=p(G)$.
 
 \subsection{Modeling stress}
 
-We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t. we can benefit from their analytic properties. For $n \geq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$, but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment. Drawing $H$ this way results in a bounded interval in $\mathbb{R}$, where straight-line segments overlap with the points, which we deem unfit for representation purposes.
-For $n \geq 4$, visualization becomes difficult. We will see that $n=2,3$ suffice. When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$. For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$. We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction. A broadly used approach is to use a stress-function $S$ that assigns  the graph $H$ a real number, the stress in $H$. The local minima of $S$ are our desired representations of $G$.
+We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t.\ we can benefit from their analytic properties.
+For $n \geq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$,
+but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment.
+Drawing $H$ this way results in a bounded interval in $\mathbb{R}$,
+where straight-line segments overlap with the points,
+which we deem unfit for representation purposes.
+
+For $n \geq 4$, visualization becomes difficult. We will see that $n=2,3$ suffice.
+When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$.
+For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$.
+We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction.
+A broadly used approach is to use a stress-function $S$ that assigns  the graph $H$ a real number, the stress in $H$.
+The local minima of $S$ are our desired representations of $G$.
 
 \subsubsection{FR model}
 
@@ -53,27 +100,54 @@ Fruchterman and Reingold developed this model in 1991, following two main princi
 \item drawing neighboring vertices near each other
 \item vertices should not  be drawn too near to each other
 \end{itemize}
+
 The FR model uses the following stress-function:
-\begin{equation} S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}-\sum_{\{u,v \} \subseteq V}{log \parallel p(u)-p(v) \parallel} \end{equation}
+\begin{equation}
+    S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}
+    -
+    \sum_{\{u,v \} \subseteq V}{\log \parallel p(u)-p(v) \parallel}
+\end{equation}
+
 Observe the following:
+
 \begin{itemize}
 \item the further apart neighboring vertices get mapped the bigger the stress
 \item small distances between vertices let the logarithm explode
 \item the logarithm dominates at small distances and hinders the graph from collapsing, or converging into a single point
 \end{itemize}
-$S_{FR}$ satisfies the two main principles, while being rather quick when implemented into an algorithm. The attractive force is only calculated over $F$ and the repulsive force over $W$, the authors name this as an advantage over Davidson and Harel's model, which also penalized edge crossing.
+
+$S_{FR}$ satisfies the two main principles, while being rather quick when implemented into an algorithm.
+The attractive force is only calculated over $F$ and the repulsive force over $W$,
+the authors name this as an advantage over Davidson and Harel's model, which also penalized edge crossing.
 
 \subsubsection{ERLL model}
 
-The Edge Repulsion LinLog model by Andreas Noack, 2004, places its focus on the graph's edges. For $v \in V$, let $deg(v)$ denote the number of edges $v$ is an endpoint of.
-\begin{equation} S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} - \sum_{\{u,v \} \subseteq V}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel} \end{equation}
-The edges cause both attraction and repulsion. Let us compare the ERLL with the FR model. Let $G$ be a graph. Now consider the unordered pairs ${u,v} \subseteq V$. If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=deg(v)^2$. Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $deg(u)deg(v)$. The repulsive force in the FR model only depends on distance, letting "big nodes" be pulled inside the graph's embedding by the attractive force. The ERLL solves this issue, spacing "big nodes" evenly. This results in clearer embeddings of highly ununiform graphs. 
+The Edge Repulsion LinLog model by Andreas Noack, 2004, places its focus on the graph's edges.
+For $v \in V$, let $\deg(v)$ denote the number of edges $v$ is an endpoint of.
+
+\begin{equation}
+    S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel}
+    -
+    \sum_{\{u,v \} \subseteq V}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel}
+\end{equation}
+
+The edges cause both attraction and repulsion.
+
+Let us compare the ERLL with the FR model. Let $G$ be a graph.
+
+Now consider the unordered pairs ${u,v} \subseteq V$.
+If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=\deg{(v)}^2$.
+
+Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $\deg(u)\deg(v)$.
+The repulsive force in the FR model only depends on distance, letting ``big nodes'' be pulled inside the graph's embedding by the attractive force.
+
+The ERLL solves this issue, spacing ``big nodes'' evenly. This results in clearer embeddings of highly ununiform graphs. 
 
 \section{Implementation}
 
 \subsection{Plotting a graph embedding}
 
-To plot our graph embedding, we use the Graphs library \cite{graphsjl} as well as the Plots library \cite{plotsjl}.
+To plot our graph embedding, we use the Graphs library~\cite{graphsjl} as well as the Plots library~\cite{plotsjl}.
 
 \begin{minted}{julia}
 using Plots
@@ -151,7 +225,6 @@ function fr_stress(g::SimpleGraph, p::Matrix{Float64})
     return stress(g, edge_stress_f, vertex_stress_f, combine_f)
 end
 
-
 function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
     D = pairwise(Euclidean(), p, dims=2)
     edge_stress_f = (i, j) -> D[i, j]
@@ -164,7 +237,7 @@ end
 Note that we add a small constant to the distance in the logarithm to prevent it
 from exploding when two vertices are mapped to the same point.
 
-We use the \texttt{pairwise} function from the Distances library \cite{distancesjl} to compute the distance matrix $D$.
+We use the \texttt{pairwise} function from the Distances library~\cite{distancesjl} to compute the distance matrix $D$.
 This is way more efficient than computing the distances in a nested loop.
 
 Also note that the erll stress function takes an additional argument,
@@ -176,7 +249,7 @@ it would be inefficient to calculate it inside the vertex stress function.
 
 The final piece in the puzzle is to actually use the plotting and the stress functions
 to find good embeddings of a given graph. To do this, we use gradient descent.
-We use the Zygote library \cite{zygotejl} to compute the gradients of the stress functions.
+We use the Zygote library~\cite{zygotejl} to compute the gradients of the stress functions.
 
 With zygote, we can easily differentiate through our stress functions,
 which are implemented in a very straightforward way. Zygote does this by using source-to-source automatic differentiation,
@@ -200,24 +273,23 @@ being very tired and as such, trying to find the nearest town. To do that, he al
 Crucially, he does not have any momentum.
 
 \begin{minted}{julia}
-function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int64)
+function simple_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, max_steps::Int64, filename::String, stres_fn_name::String)
     n = nv(g) # Number of vertices
-    deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 
     stresses = Float64[]
 
     for k in 1:max_steps
-        s, (grad,) = Zygote.withgradient(q -> fr_stress(g, q), p)
+        s, (grad,) = Zygote.withgradient(q -> stress_fn(g, q), p)
         push!(stresses, s)
 
-        if length(stresses) > 1 && abs(stresses[end] - stresses[end-1]) < 1e-6
+        if length(stresses) > 1 && abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, "converged.svg")
+            savefig(final, filename * "_simple_" * stres_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 
@@ -232,6 +304,19 @@ function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int6
 end
 \end{minted}
 
+A couple notes:
+
+\begin{itemize}
+    \item Let $s_l$ be the last stress value and $s_{l-1}$ be the second to last stress value.
+    To calulate if the algorithm converged, we do $\parallel \frac{s_l - s_{l-1}}{s_{l-1}} \parallel< \epsilon$.
+    A more natural way might be $\parallel s_l - s_{l-1} \parallel < \epsilon$.
+    However, with this approach, if graphs grew in size, i.e.\ the nodes were further apart, non-visible changes would be in an order of magnitude higher,
+    so to account for that, we should use the relative change instead of the absolute change.
+    \item Again, we use anonymous functions here. In this case, to easily swap the stress function, it is passed as an argument instead of being hard-coded.
+    \item The paramters \mintinline{julia}|filename::String| and \mintinline{julia}|stres_fn_name::String|
+    are for easier management of multiple graph drawings at the same time. Earlier versions of that implementation just ouputted the same file, overwriting previous results.
+\end{itemize}
+
 \subsubsection{Nesterov's accelerated gradient descent}
 
 In this version of gradient descent, we not only go a small step in the direction of the gradient, but we also add momentum to the term.
@@ -242,9 +327,8 @@ faster and faster as it goes down the hill. This can help to escape local minima
 Friction is modelled by $\beta$, which says how much of the previous momentum we keep. Because $\beta = 0.9$, we keep 90\% of the previous momentum.
 
 \begin{minted}{julia}
-function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64, max_steps::Int64, filename::String)
+function nesterov_gradient_descent(g::SimpleGraph, stress_fn::Function, alpha::Float64, beta::Float64, max_steps::Int64, filename::String, stress_fn_name::String)
     n = nv(g) # Number of vertices
-    deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 
     stresses = Float64[]
@@ -252,18 +336,17 @@ function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64
     momentum = zeros(2, n)
 
     for k in 0:max_steps
-        s, (grad,) = Zygote.withgradient(q -> fr_stress(g, q), p + beta * momentum)
-        #s, (grad,) = Zygote.withgradient(q -> erll_stress(g, q, deg), p + beta * momentum)
+        s, (grad,) = Zygote.withgradient(q -> stress_fn(g, q), p + beta * momentum)
         new_momentum = beta * momentum - alpha * grad
         push!(stresses, s)
 
-        if length(stresses) > 50 && abs(stresses[end] / stresses[end-1]) < 1e-7
+        if length(stresses) > 50 && abs((stresses[end] - stresses[end-1]) / stresses[end-1]) < 1e-7
             println("converged!")
             println("iteration ", k)
             plot1 = plot_graph(g, p)
             plot2 = plot(stresses, label="stress")
             final = plot(plot1, plot2, layout=2)
-            savefig(final, filename * "_nesterov_fr_a" * string(alpha) * "_i" * string(k) * ".svg")
+            savefig(final, filename * "_nesterov_" * stress_fn_name * "_a" * string(alpha) * "_i" * string(k) * ".svg")
             break
         end
 
@@ -291,40 +374,36 @@ Let's start with the simple gradient descent method, fr stress, $\alpha=0.001$ a
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a001_i4644.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 4644 Iterations}
-\label{wheel-graph-good}
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a0.001_i4597.svg}
+\caption{\label{wheel-graph-good} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 4597 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a001_i3669.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 3669 Iterations}
-\label{wheel-graph-bad}
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a0.001_i3669.svg}
+\caption{\label{wheel-graph-bad} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.001$, Took 3669 Iterations}
 \end{figure}
 
-Almost always, the graph converges to something looking like Figure \ref{wheel-graph-good}.
+Almost always, the graph converges to something looking like Figure~\ref{wheel-graph-good}.
 
-In a few cases (less than $10\%$), we converge into a local minimum like depicted in Figure \ref{wheel-graph-bad}
+In a few cases (less than $10\%$), we converge into a local minimum like depicted in Figure~\ref{wheel-graph-bad}
 
 \paragraph{Turning up the learning rate}
 
 When we increase the learning rate $\alpha$, there are interesting results.
 
 \begin{figure}[H]
-\centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a01_i428.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.01$, Took 428 Iterations}
-\label{wheel-graph-alpha-01}
+\centering 
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a0.01_i637.svg}
+\caption{\label{wheel-graph-alpha-0.01} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.01$, Took 428 Iterations}
 \end{figure}
 
 With a learning rate $\alpha=0.01$, the convergence speed dramatically increases with no visible poorer quality.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a1_i57.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 57 Iterations}
-\label{wheel-graph-alpha-1}
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a0.1_i58.svg}
+\caption{\label{wheel-graph-alpha-0.1} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 57 Iterations}
 \end{figure}
 
 At $\alpha=0.1$, the convergence speed increases even more, with quality staying essentially the same.
@@ -334,9 +413,8 @@ This is because we are taking too big steps, which makes us overshoot the ``vall
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a10_i11.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 11 Iterations}
-\label{wheel-graph-alpha-10}
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_fr_a1.0_i11.svg}
+\caption{\label{wheel-graph-alpha-1.0} Wheel Graph 11, Simple Gradient Descent, $\alpha=1.0$, Took 11 Iterations}
 \end{figure}
 
 Finally, at $\alpha=1.0$, the algorithm does not converge at all, and the stress values explode.
@@ -359,12 +437,11 @@ We increase the learning rate to $\alpha=0.1$ and see that convergence is much f
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_erll_a01_i9586.svg}
-\caption{Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 9586 Iterations}
-\label{wheel-graph-erll}
+\includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_erll_a0.1_i20994.svg}
+\caption{\label{wheel-graph-erll} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 20994 Iterations}
 \end{figure}
 
-The function $erll\_stress$ punishes verticies being close way more than $fr\_stress$.
+ERLL stress punishes verticies being close way more than FR stress.
 For this reason, the graphs spreads out way more, which makes the learning rate proportionally smaller.
 
 \paragraph{A good learning rate}
@@ -379,86 +456,74 @@ one could of course tune this seperately.
 In the following, we will show some examples of graphs drawn with
 the nesterov gradient descent and the different stress functions.
 They offer a comparison between the development of the stress functions.
-We will use $\alpha=0.001$ for the fr stress and $\alpha=0.1$ for the erll stress, as we have established these are good learning rates.
+We will use $\alpha=0.001$ for the fr stress and $\alpha=0.1$ for the erll stress,
+as we have established these are good learning rates.
 As a momentum decay rate, we will use $\beta=0.9$.
 
 Because some graphs move very minimally even with this $\alpha$, we sometimes increase the convergence threshold $\epsilon$.
-
-Note that for this, we have used absolute difference as a convergence criterion.
-We also changed the convergence threshold throughout the experiments,
-as we have not seen a sicnificant improvement with a lower threshold. We did this because for increasingly large graphs,
-convergence was very slow. For comparability, we have annotated each graph with the chosen $\epsilon$.
 
 \subsubsection{Icosahedral}
 
 \begin{figure}[H]
 \centering
-Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
-\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_erll_i5007.svg}
-\caption{Icosahedral Graph, Took 5007 Iterations}
-\label{icosahedral-nesterov-erll}
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_erll_a0.1_i2593.svg}
+\caption{\label{icosahedral-nesterov-erll} Icosahedral Graph, Took 2593 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_fr_i609.svg}
-\caption{Icosahedral Graph, Took 609 Iterations}
-\label{icosahedral-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/icosahedral_nesterov_fr_a0.001_i389.svg}
+\caption{\label{icosahedral-nesterov-fr} Icosahedral Graph, Took 389 Iterations}
 \end{figure}
 
 \subsubsection{Karate network}
 
 \begin{figure}[H]
 \centering
-Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
-\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_erll_i45773.svg}
-\caption{Karate Network, Took 45773 Iterations}
-\label{karate-nesterov-erll}
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_erll_a0.1_i9828.svg}
+\caption{\label{karate-nesterov-erll} Karate Network, Took 9828 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_fr_i3346.svg}
-\caption{Karate Network, Took 3346 Iterations}
-\label{karate-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/karate_nesterov_fr_a0.001_i2238.svg}
+\caption{\label{karate-nesterov-fr} Karate Network, Took 2238 Iterations}
 \end{figure}
 
 \subsubsection{Dorogovtsev Mendes Graph}
 
 \begin{figure}[H]
 \centering
-Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
-\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_25_nesterov_erll_i36780.svg}
-\caption{Dorogovtsev Mendes Graph, Took 36780 Iterations}
-\label{dorogovtsev-mendes-nesterov-erll}
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_nesterov_erll_a0.1_i4907.svg}
+\caption{\label{dorogovtsev-mendes-nesterov-erll} Dorogovtsev Mendes Graph, Took 4907 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_25_nesterov_fr_i4059.svg}
-\caption{Dorogovtsev Mendes Graph, Took 4059 Iterations}
-\label{dorogovtsev-mendes-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/dorogovtsev_mendes_nesterov_fr_a0.001_i3335.svg}
+\caption{\label{dorogovtsev-mendes-nesterov-fr} Dorogovtsev Mendes Graph, Took 3335 Iterations}
 \end{figure}
 
 \subsubsection{Circular Ladder Graph}
 
 \begin{figure}[H]
 \centering
-Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-9$
-\includesvg[width=0.6\textwidth]{../assets/circular_ladder_graph_nesterov_erll_i27000.svg}
-\caption{Circular Ladder Graph, Took (exactly) 27000 Iterations}
-\label{circular-ladder-nesterov-erll}
+Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
+\includesvg[width=0.6\textwidth]{../assets/circular_ladder_nesterov_erll_a0.1_i4944.svg}
+\caption{\label{circular-ladder-nesterov-erll} Circular Ladder Graph, Took 4944 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/circular_ladder_graph_nesterov_fr_i13683.svg}
-\caption{Circular Ladder Graph, Took 13683 Iterations}
-\label{circular-ladder-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/circular_ladder_nesterov_fr_a0.001_i1292.svg}
+\caption{\label{circular-ladder-nesterov-fr} Circular Ladder Graph, Took 1292 Iterations}
 \end{figure}
 
 \subsubsection{Watts Strogatz Graph}
@@ -466,17 +531,15 @@ Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_erll_i22689.svg}
-\caption{Watts Strogatz Graph, Took 22689 Iterations}
-\label{watts-strogatz-nesterov-erll}
+\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_erll_a0.1_i7710.svg}
+\caption{\label{watts-strogatz-nesterov-erll} Watts Strogatz Graph, Took 7710 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_fr_i1937.svg}
-\caption{Watts Strogatz Graph, Took 1937 Iterations}
-\label{watts-strogatz-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/watts_strogatz_nesterov_fr_a0.001_i791.svg}
+\caption{\label{watts-strogatz-nesterov-fr} Watts Strogatz Graph, Took 791 Iterations}
 \end{figure}
 
 \subsubsection{Static Scale Free Graph}
@@ -484,17 +547,15 @@ Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, ERLL, $\alpha=0.1$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_erll_i9587.svg}
-\caption{Static Scale Free Graph, Took 9587 Iterations}
-\label{static-scale-free-nesterov-erll}
+\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_erll_a0.1_i2887.svg}
+\caption{\label{static-scale-free-nesterov-erll} Static Scale Free Graph, Took 2887 Iterations}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 Nesterov Gradient Descent, FR, $\alpha=0.001$, $\epsilon=1e-7$
-\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_fr_i1383.svg}
-\caption{Static Scale Free Graph, Took 1383 Iterations}
-\label{static-scale-free-nesterov-fr}
+\includesvg[width=0.6\textwidth]{../assets/static_scale_free_nesterov_fr_a0.001_i884.svg}
+\caption{\label{static-scale-free-nesterov-fr} Static Scale Free Graph, Took 884 Iterations}
 \end{figure}
 
 \subsection{Conclusion}
