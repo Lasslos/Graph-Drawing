@@ -64,7 +64,7 @@ function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
 end
 
 function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int64)
-    n = nv(g) # Number of vertecies
+    n = nv(g) # Number of vertices
     deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 
@@ -95,7 +95,7 @@ function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int6
 end
 
 function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64, max_steps::Int64)
-    n = nv(g) # Number of vertecies
+    n = nv(g) # Number of vertices
     deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 

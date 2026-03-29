@@ -24,29 +24,22 @@
 
 \section{Introduction}
 
-\section{Graph Embedding}
+Graphs are a prominent object in modern mathematics. They are quite useful for abstracting complex reallife situations, e.g. railway networks, data structure, geometric objects, etc. Imagine two companies. For each company, employees are denoted as vertices, and daily interactions between employees as edges. A researcher could now compare the companies on communication through hierarchy, between employees of the same department, etc., by studying the two graphs. The researcher needs to meticulously search through huge lists of vertices and edges. Having a graph be represented as a simple drawing, vertices as points, and edges as straight-line segments, would speed up the process. That is part of our goal. We want a lossless representation of finite graphs in $\mathbb{R}^2$ and $\mathbb{R}^3$ in an esthetically pleasing way s.t. we can quickly gain a better understanding of what type a given graph is.
+
+\section{Graph embedding}
 A graph $G=(V,E)$ is an ordered pair of vertices $V$ and a set of edges $E \subseteq \{ \{u,v \} \mid u,v \in V \}$, an edge $e$ being $e=\{u,v\}$ .
 Since our ultimate goal is to have a drawn version of a given graph $G$, it is natural to limit ourselves to a finite set $V$. A finite set $V$ induces $E$ to be a finite set. First, we will define a general way  to embed graphs in vectorspaces $\mathbb{R}^n$. We will see that every graph $G$ has uncountably many possible embeddings $H$ and then optimize the look of an embedding to a given graph $G$.
 
-\subsection{Graph Embedding}
+\subsection{Graph embedding}
 
 Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v \in V$ to a point $a \in A$. Let us call the image $W=Im(p) \subseteq A$ and consider $W$ as a set of vertices, then we get the following.
-\begin{equation}
-    \label{small-p-injective}
-    p \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad p=q : V \to W
-\end{equation}
+\begin{equation} p \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad p=q : V \to W \end{equation}
 \linebreak Let $\Omega = \{ \{a,b \} \mid a,b \in A \} $ be the set of all unordered pairs of $W$. We define a function
 \linebreak $P : E \to \Omega, \{ u,v \} \mapsto \{ p(u),p(v) \}$ and call $F=Im(P) \subseteq \Omega$. Since $p$ is injective, therefore $P$ is injective and by the same argument we get the following.
-\begin{equation}
-    \label{capital-p-injective} 
-    P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F
-\end{equation}
-\linebreak This means, an injective $p$ induces (\ref{small-p-injective}) and (\ref{capital-p-injective}). For the existence of such a $p$, we need to have
-\begin{equation}
-    \label{vertex-set-size}
-    \quad |V| \leq |A| \text{.}
-\end{equation}
-\linebreak Gathering what we have, if (\ref{vertex-set-size}) is true, then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$. To keep it short, let us say $H=p(G)$.
+\begin{equation} P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F \end{equation}
+\linebreak This means, an injective $p$ induces (1) and (2). For the existence of such a $p$, we need to have
+\begin{equation} \quad |V| \leq |A| \text{.} \end{equation}
+\linebreak Gathering what we have, if (3) is true, then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$. To keep it short, let us say $H=p(G)$.
 
 \subsection{Modeling stress}
 
@@ -60,22 +53,20 @@ Fruchterman and Reingold developed this model in 1991, following two main princi
 \item vertices should not  be drawn too near to each other
 \end{itemize}
 The FR model uses the following stress-function:
-\begin{equation} S(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}-\sum_{\{u,v \} \in V^2}{log \parallel p(u)-p(v) \parallel} \end{equation}
+\begin{equation} S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}-\sum_{\{u,v \} \in V^2}{log \parallel p(u)-p(v) \parallel} \end{equation}
 Observe the following:
 \begin{itemize}
 \item the further apart neighboring vertices get mapped the bigger the stress
 \item small distances between vertices let the logarithm explode
 \item the logarithm dominates at small distances and hinders the graph from collapsing, or converging into a single point
 \end{itemize}
-$S$ satisfies the two main principles, while being rather quick when implemented into an algorithm. The attractive force is only calculated over $F$ and the repulsive force over $W$, the authors name this as an advantage over Davidson and Harel's model, which also penalized edge crossing.
+$S_{FR}$ satisfies the two main principles, while being rather quick when implemented into an algorithm. The attractive force is only calculated over $F$ and the repulsive force over $W$, the authors name this as an advantage over Davidson and Harel's model, which also penalized edge crossing.
 
 \subsubsection{ERLL model}
 
 The Edge Repulsion LinLog model by Andreas Noack, 2004, places its focus on the graph's edges. For $v \in V$, let $deg(v)$ denote the number of edges $v$ is an endpoint of.
-\begin{equation} S(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} - \sum_{\{u,v \} \in V^2}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel} \end{equation}
-The edges cause both attraction and repulsion. Let us compare the ERLL with the FR model. Let $G$ be a graph. Now consider the unordered pairs ${u,v} \in V^2$. If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=deg(v)^2$. Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $deg(u)deg(v)$. The repulsive force in the FR model only depends on distance, letting "big nodes" be pulled inside the graph's embedding by the attractive force. The ERLL solves this issue, spacing "big nodes" evenly. This results in clearer embeddings of highly ununiform graphs. We still require a method to find the minima of $S$.
-
-\subsection{Gradient Descent}
+\begin{equation} S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} - \sum_{\{u,v \} \in V^2}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel} \end{equation}
+The edges cause both attraction and repulsion. Let us compare the ERLL with the FR model. Let $G$ be a graph. Now consider the unordered pairs ${u,v} \in V^2$. If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=deg(v)^2$. Assume $G$ is of ununiform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $deg(u)deg(v)$. The repulsive force in the FR model only depends on distance, letting "big nodes" be pulled inside the graph's embedding by the attractive force. The ERLL solves this issue, spacing "big nodes" evenly. This results in clearer embeddings of highly ununiform graphs. 
 
 \section{Implementation}
 
@@ -117,7 +108,7 @@ function plot_graph_3d(g::SimpleGraph, p::Matrix{Float64})
 end
 \end{minted}
 
-In the intialization of all the vectors and matrices, make sure to update the dimensions to $3$.
+In the initialization of all the vectors and matrices, make sure to update the dimensions to $3$.
 
 \subsection{Stress functions}
 
@@ -169,11 +160,11 @@ function erll_stress(g::SimpleGraph, p::Matrix{Float64}, deg::Vector{Int})
 end
 \end{minted}
 
-Not that we add a small constant to the distance in the logarithm to prevent it
+Note that we add a small constant to the distance in the logarithm to prevent it
 from exploding when two vertices are mapped to the same point.
 
 We use the \texttt{pairwise} function from the Distances library \cite{distancesjl} to compute the distance matrix $D$.
-This is way more effiecient than computing the distances in a nested loop.
+This is way more efficient than computing the distances in a nested loop.
 
 Also note that the erll stress function takes an additional argument,
 which is the degree of each vertex. This is used in the calculation,
@@ -202,14 +193,14 @@ It is important that we do not check for equality of the stress values, since th
 to each other without being exactly equal. Instead, we check if the absolute difference is smaller than a small threshold.
 
 
-\subsubsection{Simple Gradient Descent}
+\subsubsection{Simple gradient descent}
 This is the simple version of the gradient descent algorithm. One can imagine what this algorithm does by imagining a hiker
 being very tired and as such, trying to find the nearest town. To do that, he always goes in the direction of steepest descent.
 Crucially, he does not have any momentum.
 
 \begin{minted}{julia}
 function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int64)
-    n = nv(g) # Number of vertecies
+    n = nv(g) # Number of vertices
     deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 
@@ -240,18 +231,18 @@ function simple_gradient_descent(g::SimpleGraph, alpha::Float64, max_steps::Int6
 end
 \end{minted}
 
-\subsubsection{Nesterov's Accelerated Gradient Descent}
+\subsubsection{Nesterov's accelerated gradient descent}
 
 In this version of gradient descent, we not only go a small step in the direction of the gradient, but we also add momentum to the term.
 
 This can be imagined by a ball rolling, which in addition to going downhill, also has some inertia, which makes it roll
 faster and faster as it goes down the hill. This can help to escape local minima and find better solutions.
 
-Friction is modelled by $\beta$, which says how much of the previous momentum we keep. Because $\beta = 0,9$, we keep 90\% of the previous momentum.
+Friction is modelled by $\beta$, which says how much of the previous momentum we keep. Because $\beta = 0.9$, we keep 90\% of the previous momentum.
 
 \begin{minted}{julia}
 function nesterov_gradient_descent(g::SimpleGraph, alpha::Float64, beta::Float64, max_steps::Int64)
-    n = nv(g) # Number of vertecies
+    n = nv(g) # Number of vertices
     deg = degree(g) # The degrees of the edges
     p = rand(2, n) # Initial positions
 
@@ -290,7 +281,7 @@ end
 \section{Results}
 
 \subsection{Figuring out good learning rates}
-\subsubsection{Simple Gradient Descent, FR Stress}
+\subsubsection{Simple gradient descent, FR stress}
 Let's start with the simple gradient descent method, fr stress, $\alpha=0.001$ and the wheel graph 11.
 
 \begin{figure}[H]
@@ -331,7 +322,7 @@ With a learning rate $\alpha=0.01$, the convergence speed dramatically increases
 \label{wheel-graph-alpha-1}
 \end{figure}
 
-At $\alpha=0.1$, the convergence speed increases even more, with quality staying esentially the same.
+At $\alpha=0.1$, the convergence speed increases even more, with quality staying essentially the same.
 However, the rate of poorly converged graphs increases, however this is difficult to quantify.
 We also see that stress has actually increased twice, even though we were going ``downhill''.
 This is because we are taking too big steps, which makes us overshoot the ``valley''.
@@ -353,7 +344,7 @@ From this, we can learn that we should always be careful when choosing the learn
 For a simple graph, there are not as many local minima, so bigger learning rates still work,
 but we should not do this for a more complex graph.
 
-\subsubsection{Simple Gradient Descent, ERLL Stress}
+\subsubsection{Simple gradient descent, ERLL stress}
 
 Continuing with the simple gradient descent method, erll stress, $\alpha=0.001$ and the wheel graph 11,
 we see that convergence is painfully slow. On the graph, we can see the verticies spreading out
@@ -379,7 +370,7 @@ and at $\alpha=0.1$ compute times are reasonable for ERLL Stress, we can say tha
 For simplicity reasons, we will use the same $\alpha$ for the nesterov gradient descent,
 one could of course tune this seperately.
 
-\subsection{Some Graphs}
+\subsection{Some graphs}
 In the following, we will show some examples of graphs drawn with
 the nesterov gradient descent and the different stress functions.
 They offer a comparison between the development of the stress functions.
