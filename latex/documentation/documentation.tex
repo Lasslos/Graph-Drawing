@@ -29,13 +29,15 @@
 Graphs are a prominent object in modern mathematics.
 They are quite useful for abstracting complex reallife situations, e.g.
 railway networks, data structure, geometric objects, etc.
+
 Imagine two companies. For each company, employees are denoted as vertices,
 and daily interactions between employees as edges.
 A researcher could now compare the companies on communication through hierarchy,
-between employees of the same department, etc.,by studying the two graphs.
+between employees of the same department, etc., by studying the two graphs.
 The researcher needs to meticulously search through huge lists of vertices and edges.
+
 Having a graph be represented as a simple drawing, vertices as points,
-and edges as straight-line segments, would speed up the process.
+and edges as straight-line segments would speed up the process.
 That is part of our goal. We want a representation of finite graphs
 in $\mathbb{R}^2$ and $\mathbb{R}^3$ in an esthetically pleasing way
 s.t.\ we can quickly gain a better understanding of what type a given graph is.
@@ -50,7 +52,7 @@ First, we will define a general way to embed graphs in vectorspaces $\mathbb{R}^
 We will see that every graph $G$ has uncountably many possible embeddings $H$
 and then optimize the look of an embedding to a given graph $G$.
 
-\subsection{Graph embedding}
+\subsection{Existence of embeddings}
 
 Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v \in V$ to a point $a \in A$.
 Let us call the image $W=Im(p) \subseteq A$ and consider $W$ as a set of vertices, then we get the following.
@@ -67,35 +69,36 @@ Since $p$ is injective, therefore $P$ is injective and by the same argument we g
     P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F
 \end{equation}
 
-This means, an injective $p$ induces~(\eqref{eq:lower-p-injective}) and~(\eqref{eq:upper-p-injective}). For the existence of such a $p$, we need to have
+This means, an injective $p$ induces~\eqref{eq:lower-p-injective} and~\eqref{eq:upper-p-injective}. For the existence of such a $p$, we need to have
 
 \begin{equation} \label{eq:inequality-vertices-image}
     \quad |V| \leq |A| \text{.}
 \end{equation}
 
-Gathering what we have, if~(\eqref{eq:inequality-vertices-image}) is true,
+Gathering what we have, if~\eqref{eq:inequality-vertices-image} is true,
 then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$.
 To keep it short, let us say $H=p(G)$.
 
 \subsection{Modeling stress}
 
 We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t.\ we can benefit from their analytic properties.
-For $n \geq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$,
+For $n \leq 1$, an injective  $ p : V \to \mathbb{R}^n$ induces an embedding of $G$ in $\mathbb{R}^n$,
 but we add a drawing function $d : F \to \mathbb{R}^n, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment.
 Drawing $H$ this way results in a bounded interval in $\mathbb{R}$,
 where straight-line segments overlap with the points,
 which we deem unfit for representation purposes.
 
 For $n \geq 4$, visualization becomes difficult. We will see that $n=2,3$ suffice.
+
 When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$.
 For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$.
 We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction.
-A broadly used approach is to use a stress-function $S$ that assigns  the graph $H$ a real number, the stress in $H$.
-The local minima of $S$ are our desired representations of $G$.
+A broadly used approach is to use a stress function $S$ that assigns the graph $H$ a real number, the stress in $H$.
+The global minimum of $S$ is our desired representations of $G$.
 
 \subsubsection{FR model}
 
-Fruchterman and Reingold developed this model in 1991, following two main principles:
+Fruchterman and Reingold developed this model in 1991, following two main principles~\cite{fr_paper}:
 \begin{itemize}
 \item drawing neighboring vertices near each other
 \item vertices should not  be drawn too near to each other
@@ -122,8 +125,8 @@ the authors name this as an advantage over Davidson and Harel's model, which als
 
 \subsubsection{ERLL model}
 
-The Edge Repulsion LinLog model by Andreas Noack, 2004, places its focus on the graph's edges.
-For $v \in V$, let $\deg(v)$ denote the number of edges $v$ is an endpoint of.
+The Edge Repulsion LinLog model by Andreas Noack, 2003, places its focus on the graph's edges.
+For $v \in V$, let $\deg(v)$ denote the number of edges $v$ is an endpoint of~\cite{erll_paper}.
 
 \begin{equation}
     S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel}
@@ -432,7 +435,7 @@ but we should not do this for a more complex graph.
 Continuing with the simple gradient descent method, erll stress, $\alpha=0.001$ and the wheel graph 11,
 we see that convergence is painfully slow. On the graph, we can see the verticies spreading out
 way more than with fr stress. This reveals a fundamental difference:
-ERLL stress punishes verticies being close way more than FR stress, which makes the learning rate proportionally smaller.
+ERLL stress allows verticies to be far away more than FR stress, which makes the learning rate proportionally smaller.
 We increase the learning rate to $\alpha=0.1$ and see that convergence is much faster.
 
 \begin{figure}[H]
@@ -440,9 +443,6 @@ We increase the learning rate to $\alpha=0.1$ and see that convergence is much f
 \includesvg[width=0.7\textwidth]{../assets/wheel_graph_11_simple_erll_a0.1_i20994.svg}
 \caption{\label{wheel-graph-erll} Wheel Graph 11, Simple Gradient Descent, $\alpha=0.1$, Took 20994 Iterations}
 \end{figure}
-
-ERLL stress punishes verticies being close way more than FR stress.
-For this reason, the graphs spreads out way more, which makes the learning rate proportionally smaller.
 
 \paragraph{A good learning rate}
 
@@ -459,8 +459,6 @@ They offer a comparison between the development of the stress functions.
 We will use $\alpha=0.001$ for the fr stress and $\alpha=0.1$ for the erll stress,
 as we have established these are good learning rates.
 As a momentum decay rate, we will use $\beta=0.9$.
-
-Because some graphs move very minimally even with this $\alpha$, we sometimes increase the convergence threshold $\epsilon$.
 
 \subsubsection{Icosahedral}
 
