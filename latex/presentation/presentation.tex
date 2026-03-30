@@ -30,149 +30,116 @@
         \item Model relationships: vertices for entities, edges for connections
     \end{itemize}
 \end{frame}
+
 \begin{frame}
     \textbf{Example:} Two companies with employees as vertices and daily interactions as edges.
     \begin{itemize}
         \item Compare communication hierarchy and department interactions
         \item Difficulty: meticulously searching through huge lists of vertices and edges
     \end{itemize}
-
-    \textbf{Goal:} Represent finite graphs in $\mathbb{R}^2$ and $\mathbb{R}^3$ aesthetically.
+    \textbf{Goal:} Represent finite graphs in $\mathbb{R}^2$ and $\mathbb{R}^3$ esthetically.
     \begin{itemize}
         \item Drawing: vertices as points, edges as straight-line segments
         \item Quickly understand structure and type of a given graph
     \end{itemize}
 \end{frame}
 
+\begin{frame}{Graph embedding}
+    \textbf{Graph definition:}
+    \begin{itemize}
+        \item set of vertices $V$, set of edges $E \subseteq \{ \{ u,v \} \mid u,v \in E\}$ then $G=(V,E)$
+    \end{itemize}
+    Our goal is to draw graphs, for our purposes a drawable graph has a finite set of vertices.
+    \begin{itemize}
+        \item finite $V \implies$ finite $E$
+    \end{itemize}
+    A graph embedding $p$ is an injective map $p : V \to A$, which maps every $v \in V$. $p$ induces an embedding of $E$, therefore $p$ is a lossless embedding of $G$ in $A$.
+    \begin{itemize}
+        \item $\exists p \iff |V| \leq |A|$
+    \end{itemize}
+    
+    Let us call $H=p(G)$ and choose $A= \mathbb{R}^n, \quad n=2,3$
+\end{frame}
 
+\begin{frame}{Modeling stress}
+    We add a drawing function $d : F \to \mathbb{R}, \{ a,b \} \mapsto \overline{ab}$, giving us a drawing of $H$.
+    
+    $W \subseteq \mathbb{R}^n$ essentially randomly chosen, drawings of $H$ are mostly tangled.
+    We use a stress function $S$ that assigns the graph $H$ a real number, the stress in $H$.
+    Minima of $S$ are our desired representations of $G$, if possible the global minimum as ideal.
+\end{frame}
 
-\section{Graph embedding}
-A graph $G=(V,E)$ is an ordered pair of vertices $V$
-and a set of edges $E \subseteq \{ \{u,v \} \mid u,v \in V \}$, an edge $e$ being $e=\{u,v\}$.
-Since our ultimate goal is to have a drawn version of a given graph $G$,
-it is natural to limit ourselves to a finite set $V$.
-A finite set $V$ induces $E$ to be a finite set.
-First, we will define a general way to embed graphs in vectorspaces $\mathbb{R}^n$.
-We will see that every graph $G$ has uncountably many possible embeddings $H$
-and then optimize the look of an embedding to a given graph $G$.
+\begin{frame}{FR model}
+    developed 1991, by Fruchterman and Reingold, following two main principles~\cite{fr_paper}:
+    \begin{itemize}
+    \item drawing neighboring vertices near each other
+    \item vertices should not  be drawn too near to each other
+    \end{itemize}
 
-\subsection{Existence of embeddings}
+    The FR model uses the following stress-function:
+    \begin{equation}
+        S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}
+        - \sum_{\{u,v \} \subseteq V}{\log \parallel p(u)-p(v) \parallel}
+    \end{equation}
+\end{frame}
 
-Let $G$ be a graph. We define a map as $p : V \to A$, which maps every vertex $v \in V$ to a point $a \in A$.
-Let us call the image $W=Im(p) \subseteq A$ and consider $W$ as a set of vertices, then we get the following.
+\begin{frame}
+    \textbf{Observe:}
+    \begin{itemize}
+        \item the further apart neighboring vertices get mapped the bigger the stress
+        \item small distances between vertices let the logarithm explode
+        \item the logarithm dominates at small distances and hinders the graph from collapsing, or converging into a single point
+    \end{itemize}
+    $S_{FR}$ satisfies the two main principles, while being rather quick when implemented into an algorithm.
+\end{frame}
 
-\begin{equation} \label{eq:lower-p-injective}
-    p \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad p=q : V \to W
-\end{equation}
+\begin{frame}{ERLL model}
+    The Edge Repulsion LinLog model by Andreas Noack, 2003, places its focus on the graph's edges.
+    For $v \in V$, let $\deg(v)$ denote the number of edges $v$ is an endpoint of~\cite{erll_paper}.
+    \begin{equation}
+    \begin{split}
+        S_{ERLL}(p(G)) = & \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel} \\
+        & - \sum_{\{u,v \} \subseteq V}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel}
+    \end{split}
+    \end{equation}
+\end{frame}
 
-Let $\Omega = \{ \{a,b \} \mid a,b \in A \} $ be the set of all unordered pairs of $W$. We define a function
-$P : E \to \Omega, \{ u,v \} \mapsto \{ p(u),p(v) \}$ and call $F=Im(P) \subseteq \Omega$.
-Since $p$ is injective, therefore $P$ is injective and by the same argument we get the following.
-
-\begin{equation} \label{eq:upper-p-injective}
-    P \quad \text{is injective} \iff \text{There exists exactly one bijection} \quad P=Q : E \to F
-\end{equation}
-
-This means, an injective $p$ induces~\eqref{eq:lower-p-injective} and~\eqref{eq:upper-p-injective}. For the existence of such a $p$, we need to have
-
-\begin{equation} \label{eq:inequality-vertices-image}
-    \quad |V| \leq |A| \text{.}
-\end{equation}
-
-Gathering what we have, if~\eqref{eq:inequality-vertices-image} is true,
-then there exist embeddings $p$, then $H = (p(V), P(E))$ is equivalent to $G$.
-To keep it short, let us say $H=p(G)$.
-
-\subsection{Modeling stress}
-
-We now choose $A$ to be an $\mathbb{R}$-vectorspace, s.t.\ we can benefit from their analytic properties.
-For $n = 1$, an injective  $ p : V \to \mathbb{R}$ induces an embedding of $G$ in $\mathbb{R}$,
-but we add a drawing function $d : F \to \mathbb{R}, \{ a,b \} \mapsto \overline{ab}$ that draws an edge as a straight-line segment.
-Drawing $H$ this way results in a bounded interval in $\mathbb{R}$,
-where straight-line segments overlap with the points,
-which we deem unfit for representation purposes.
-
-For $n \geq 4$, visualization becomes difficult. We will see that $n=2,3$ suffice.
-
-When embedding a graph $G$ into $\mathbb{R} ^n$, we essentially choose a finite set of points $W$.
-For every graph $G$ there exist uncountably many embeddings into $\mathbb{R} ^n$.
-We want to gain as much order as possible. Graphs can end up looking tangled, because they are randomly chosen points by construction.
-A broadly used approach is to use a stress function $S$ that assigns the graph $H$ a real number, the stress in $H$.
-The local minimum of $S$ is our desired representations of $G$.
-
-\subsubsection{FR model}
-
-Fruchterman and Reingold developed this model in 1991, following two main principles~\cite{fr_paper}:
-\begin{itemize}
-\item drawing neighboring vertices near each other
-\item vertices should not  be drawn too near to each other
-\end{itemize}
-
-The FR model uses the following stress-function:
-\begin{equation}
-    S_{FR}(p(G)) = \frac{1}{6}\sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel^3}
-    -
-    \sum_{\{u,v \} \subseteq V}{\log \parallel p(u)-p(v) \parallel}
-\end{equation}
-
-Observe the following:
-
-\begin{itemize}
-\item the further apart neighboring vertices get mapped the bigger the stress
-\item small distances between vertices let the logarithm explode
-\item the logarithm dominates at small distances and hinders the graph from collapsing, or converging into a single point
-\end{itemize}
-
-$S_{FR}$ satisfies the two main principles, while being rather quick when implemented into an algorithm.
-The attractive force is only calculated over $F$ and the repulsive force over $W$,
-the authors name this as an advantage over Davidson and Harel's model, which also penalized edge crossing.
-
-\subsubsection{ERLL model}
-
-The Edge Repulsion LinLog model by Andreas Noack, 2003, places its focus on the graph's edges.
-For $v \in V$, let $\deg(v)$ denote the number of edges $v$ is an endpoint of~\cite{erll_paper}.
-
-\begin{equation}
-    S_{ERLL}(p(G)) = \frac{1}{2} \sum_{\{u,v\} \in E}{\parallel p(u)-p(v) \parallel}
-    -
-    \sum_{\{u,v \} \subseteq V}{\deg(u)\deg(v) \log\parallel p(u)-p(v) \parallel}
-\end{equation}
-
-The edges cause both attraction and repulsion.
-
-Let us compare the ERLL with the FR model. Let $G$ be a graph.
-
-Now consider the unordered pairs ${u,v} \subseteq V$.
-If $G$ is of uniform degrees, then FR and ERLL are of the same repulsion, only difference is a scalar $c=\deg{(v)}^2$.
-
-Assume $G$ is of non-uniform degrees, in FR the repulsion remains the same, but in ERLL vertices $u,v$ of high degree repel each other proportional to $\deg(u)\deg(v)$.
-The repulsive force in the FR model only depends on distance, letting ``big nodes'' be pulled inside the graph's embedding by the attractive force.
-
-The ERLL solves this issue, spacing ``big nodes'' evenly. This results in clearer embeddings of highly non-uniform graphs. 
-
+\begin{frame}
+    \textbf{Observe:}
+    \begin{itemize}
+        \item edges cause both attraction and repulsion
+        \item $G$ of uniform degrees: FR $\approx$ ERLL scaled with $c=\deg{(v)}^2$
+        \item $G$ of non-uniform degrees: FR repulsion remains the same, but vertices $u,v$ repel each other proportional to $\deg(u)\deg(v)$ in ERLL.
+    \end{itemize}
+    $\implies$ ERLL spreads out "big nodes" compared to FR, usefull in highly non-uniform graphs
+\end{frame}
 \section{Implementation}
 
-\subsection{Plotting a graph embedding}
-
-To plot our graph embedding, we use the Graphs library~\cite{graphsjl} as well as the Plots library~\cite{plotsjl}.
-
-\begin{minted}{julia}
+\begin{frame}[fragile]{Plotting a Graph Embedding}
+\begin{minted}[fontsize=\footnotesize]{julia}
 using Plots
 using Graphs
 
 function plot_graph(g::SimpleGraph, p::Matrix{Float64})
     plt = plot(legend = false, aspect_ratio = :equal)
     for e in edges(g)
-        plot!(plt, [p[1, src(e)], p[1, dst(e)]], [p[2, src(e)], p[2, dst(e)]],
-                color = :black)
+        plot!(plt, [p[1, src(e)], p[1, dst(e)]],
+            [p[2, src(e)], p[2, dst(e)]], color = :black)
     end
     scatter!(plt, p[1, :], p[2, :], markersize=5, color = :blue)
     return plt
 end
 \end{minted}
+\end{frame}
 
-Note that we first plot the edges by drawing straight lines between the vertices,
-and then we plot the vertices on top of the edges. This way, the vertices are not hidden behind the edges.
+\begin{frame}
+\textbf{A couple notes:}
+\begin{itemize}
+    \item Dependencies: Graphs~\cite{graphsjl} and Plots~\cite{plotsjl} libraries
+    \item Arguments: A graph $g$ and a position matrix $p$ with vertex coordinates
+    \item Order of plotting matters: edges first, then vertices
+\end{itemize}
+\end{frame}
 
 \subsubsection{Higher dimension plotting}
 
